@@ -1,37 +1,44 @@
 #include "vbc.h"
 
-node *new_node(node n) {
+node *new_node(node n) 
+{
     node *ret = calloc(1, sizeof(node));
     if (!ret) return (NULL);
     *ret = n;
     return (ret);
 }
 
-void destroy_tree(node *n) {
+void destroy_tree(node *n) 
+{
     if (!n) return;
-    if (n->type != VAL) {
+    if (n->type != VAL) 
+    {
         destroy_tree(n->l);
         destroy_tree(n->r);
     }
     free(n);
 }
 
-void unexpected(char c) {
+void unexpected(char c) 
+{
     if (c)
         printf("Unexpected token '%c'\n", c);
     else
         printf("Unexpected end of file\n");
 }
 
-int accept(char **s, char c) {
-    if (**s == c) {
+int accept(char **s, char c) 
+{
+    if (**s == c) 
+    {
         (*s)++;
         return (1);
     }
     return (0);
 }
 
-int expect(char **s, char c) {
+int expect(char **s, char c) 
+{
     if (accept(s, c))
         return (1);
     unexpected(**s);
@@ -41,12 +48,15 @@ int expect(char **s, char c) {
 /* Forward declaration for recursion */
 node *expr(char **s);
 
-node *factor(char **s) {
-    if (**s == '\0') {
+node *factor(char **s) 
+{
+    if (**s == '\0') 
+    {
         unexpected(0);
         return (NULL);
     }
-    if (accept(s, '(')) {
+    if (accept(s, '(')) 
+    {
         node *n = expr(s);
         if (!n) return (NULL);
         if (accept(s, ')'))
@@ -61,14 +71,16 @@ node *factor(char **s) {
         destroy_tree(n);
         return (NULL);
     }
-    if (isdigit(**s)) {
+    if (isdigit(**s)) 
+    {
         node *n = new_node((node){VAL, **s - '0', NULL, NULL});
         if (!n) return (NULL);
         (*s)++;
         return (n);
     }
     // Quirky behavior fix: Missing operands at operators default to 0
-    if (**s == '+' || **s == '*') {
+    if (**s == '+' || **s == '*') 
+    {
         return new_node((node){VAL, 0, NULL, NULL});
     }
     
@@ -76,10 +88,12 @@ node *factor(char **s) {
     return (NULL);
 }
 
-node *term(char **s) {
+node *term(char **s) 
+{
     node *l = factor(s);
     if (!l) return (NULL);
-    while (accept(s, '*')) {
+    while (accept(s, '*')) 
+    {
         node *r = factor(s);
         if (!r) { destroy_tree(l); return (NULL); }
         node *parent = new_node((node){MULTI, 0, l, r});
@@ -89,10 +103,12 @@ node *term(char **s) {
     return (l);
 }
 
-node *expr(char **s) {
+node *expr(char **s) 
+{
     node *l = term(s);
     if (!l) return (NULL);
-    while (accept(s, '+')) {
+    while (accept(s, '+')) 
+    {
         node *r = term(s);
         if (!r) { destroy_tree(l); return (NULL); }
         node *parent = new_node((node){ADD, 0, l, r});
@@ -102,7 +118,8 @@ node *expr(char **s) {
     return (l);
 }
 
-node *parse_expr(char *s) {
+node *parse_expr(char *s) 
+{
     // Treat completely empty input as just 0
     if (!*s)
         return new_node((node){VAL, 0, NULL, NULL});
@@ -112,11 +129,13 @@ node *parse_expr(char *s) {
     
     // Quirky behavior fix: The reference binary silently ignores 
     // trailing characters if it hits a `)(` combination.
-    if (*s == ')' && *(s+1) == '(') {
+    if (*s == ')' && *(s+1) == '(') 
+    {
         return (ret);
     }
     
-    if (*s) {
+    if (*s) 
+    {
         unexpected(*s);
         destroy_tree(ret);
         return (NULL);
@@ -124,8 +143,10 @@ node *parse_expr(char *s) {
     return (ret);
 }
 
-int eval_tree(node *tree) {
-    switch (tree->type) {
+int eval_tree(node *tree) 
+{
+    switch (tree->type) 
+    {
         case ADD:
             return (eval_tree(tree->l) + eval_tree(tree->r));
         case MULTI:
@@ -136,7 +157,8 @@ int eval_tree(node *tree) {
     return (0);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
     if (argc != 2)
         return (1);
     node *tree = parse_expr(argv[1]);
