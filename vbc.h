@@ -5,7 +5,8 @@
 # include <stdlib.h>
 # include <ctype.h>
 
-typedef struct node {
+typedef struct node 
+{
     enum { ADD, MULTI, VAL } type;
     int val;
     struct node *l;
